@@ -26,7 +26,7 @@ def SHRJsonLoader_read_json_file(path : str , ectype : str = None , key : str = 
     try:
         if os.path.exists(path):
             if os.path.isfile(path) and path.endswith('.json'):
-                return read_json_file(path)
+                return read_json_file(path , ectype , key)
             else:
                 raise Exception(f"SHRJsonLoader [ERROR.1004] only json file is supported not .{path.split('.')[-1]}.")
         else:
@@ -37,7 +37,7 @@ def SHRJsonLoader_read_json_file(path : str , ectype : str = None , key : str = 
 def SHRJsonLoader_write_json_file(json_dict : dict , path : str , ectype : str = None , key : str = None , verify : bool = False) -> None:
     try:
         if path.endswith('.json'):
-            write_json_file(json_dict , path)
+            write_json_file(json_dict , path , ectype , key)
         else:
             raise Exception(f"SHRJsonLoader [ERROR.1007] only json file is supported not .{path.split('.')[-1]}.")
     except Exception as e:
