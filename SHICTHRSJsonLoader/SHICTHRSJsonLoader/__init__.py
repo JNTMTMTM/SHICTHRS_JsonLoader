@@ -1,5 +1,10 @@
+# *-* coding: utf-8 *-*
+# src\__init__.py
+# SHICTHRS JSON LOADER
+# AUTHOR : SHICTHRS-JNTMTMTM
+# Copyright : © 2025-2026 SHICTHRS, Std. All rights reserved.
+# lICENSE : GPL-3.0
 
-from nt import read
 import os
 from colorama import init
 init()
@@ -23,7 +28,7 @@ def SHRJsonLoader_read_json_file(path : str , ectype : str = None , key : str = 
             if os.path.isfile(path) and path.endswith('.json'):
                 return read_json_file(path)
             else:
-                raise Exception(f"SHRJsonLoader [ERROR.1004] only json file is supported not .{path.split('.')[-1]}. File Path : {path} NOT FOUND")
+                raise Exception(f"SHRJsonLoader [ERROR.1004] only json file is supported not .{path.split('.')[-1]}.")
         else:
             raise Exception(f"SHRJsonLoader [ERROR.1005] unable to find json file. File Path : {path} NOT FOUND")
     except Exception as e:
@@ -31,7 +36,10 @@ def SHRJsonLoader_read_json_file(path : str , ectype : str = None , key : str = 
 
 def SHRJsonLoader_write_json_file(json_dict : dict , path : str , ectype : str = None , key : str = None , verify : bool = False) -> None:
     try:
-        pass
+        if path.endswith('.json'):
+            write_json_file(json_dict , path)
+        else:
+            raise Exception(f"SHRJsonLoader [ERROR.1007] only json file is supported not .{path.split('.')[-1]}.")
     except Exception as e:
-        raise SHRJsonLoaderException(f"SHRJsonLoader [ERROR.1007] unable to write json file. File Path : {path} | {e}")
+        raise SHRJsonLoaderException(f"SHRJsonLoader [ERROR.1008] unable to write json file. File Path : {path} | {e}")
 
