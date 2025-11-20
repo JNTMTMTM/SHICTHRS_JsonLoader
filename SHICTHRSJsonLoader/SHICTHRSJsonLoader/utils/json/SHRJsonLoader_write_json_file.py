@@ -56,18 +56,35 @@ def encrypt_dict_keys_and_values(data_dict : dict , key : str) -> dict:
     
     return encrypted_dict
 
-def write_json_file(json_dict : dict , path : str , ectype : str , key : str) -> None:
-    if ectype == 'b4':
+def write_json_file(json_dict : dict , path : str , ectype : str , key : str , verify : bool = False) -> None:
+    if ectype is None or ectype == '':
+        # 非加密类型，直接写入原始数据
+        with open(path , "w" , encoding = "utf-8") as f:
+            json.dump(json_dict , f , ensure_ascii = False)
+            f.close()
+    elif ectype == 'b4':
         if not key:
             raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
         # 深拷贝原始字典，避免修改原始数据
         encrypted_dict = encrypt_dict_keys_and_values(deepcopy(json_dict), key)
+        
+        # 添加密钥验证键值对
+        verification_token = encrypt_with_key(key, key)  # 使用密钥自身加密作为验证令牌
+        encrypted_dict["_SHR_VERIFICATION"] = verification_token
+        
+        # 如果verify为True，添加原始数据的哈希值
+        if verify:
+            # 计算原始数据的哈希值
+            original_data_str = json.dumps(json_dict, sort_keys=True, ensure_ascii=False)
+            data_hash = en_md5hash_code(original_data_str)
+            # 加密哈希值
+            encrypted_hash = encrypt_with_key(data_hash, key)
+            encrypted_dict["_SHR_DATA_HASH"] = encrypted_hash
+        
         # 将加密后的字典写入文件
         with open(path , "w" , encoding = "utf-8") as f:
             json.dump(encrypted_dict , f , ensure_ascii = False)
             f.close()
     else:
-        # 非加密类型，直接写入原始数据
-        with open(path , "w" , encoding = "utf-8") as f:
-            json.dump(json_dict , f , ensure_ascii = False)
-            f.close()
+        # 不支持的加密类型，抛出异常
+        raise ValueError(f"SHRJsonLoader [ERROR.1013] unsupported encryption type: {ectype}. Supported types: 'b4' or None")

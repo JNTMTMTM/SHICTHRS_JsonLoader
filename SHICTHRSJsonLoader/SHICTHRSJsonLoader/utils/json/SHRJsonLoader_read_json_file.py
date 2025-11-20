@@ -75,16 +75,54 @@ def decrypt_dict_keys_and_values(encrypted_dict : dict , key : str) -> dict:
     
     return decrypted_dict
 
-def read_json_file(path : str , ectype : str , key : str) -> dict:
+def read_json_file(path : str , ectype : str , key : str , verify : bool = False) -> dict:
     with open(path , "r" , encoding = "utf-8") as f:
         data = json.load(f)
         f.close()
     
-    if ectype == 'b4':
-        if not key:
-            raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
-        # 解密数据
-        return decrypt_dict_keys_and_values(data, key)
-    else:
+    if ectype is None or ectype == '':
         # 非加密类型，直接返回原始数据
         return data
+    elif ectype == 'b4':
+        if not key:
+            raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+        
+        # 验证密钥是否正确
+        if "_SHR_VERIFICATION" not in data:
+            raise ValueError(f"SHRJsonLoader [ERROR.1010] invalid encrypted file. File Path : {path}")
+        
+        # 解密验证令牌
+        verification_token = data["_SHR_VERIFICATION"]
+        decrypted_token = decrypt_with_key(verification_token, key)
+        
+        # 检查验证令牌是否与密钥匹配
+        if decrypted_token != key:
+            raise ValueError(f"SHRJsonLoader [ERROR.1011] incorrect key provided. File Path : {path}")
+        
+        # 检查是否需要验证数据完整性
+        has_data_hash = "_SHR_DATA_HASH" in data
+        encrypted_data_hash = data.get("_SHR_DATA_HASH", None)
+        
+        # 创建不包含验证令牌和哈希值的数据副本
+        data_without_verification = {k: v for k, v in data.items() if k not in ["_SHR_VERIFICATION", "_SHR_DATA_HASH"]}
+        
+        # 解密数据
+        decrypted_data = decrypt_dict_keys_and_values(data_without_verification, key)
+        
+        # 如果verify为True且存在哈希值，验证数据完整性
+        if verify and has_data_hash and encrypted_data_hash:
+            # 计算解密后数据的哈希值
+            decrypted_data_str = json.dumps(decrypted_data, sort_keys=True, ensure_ascii=False)
+            current_data_hash = en_md5hash_code(decrypted_data_str)
+            
+            # 解密原始哈希值
+            original_hash = decrypt_with_key(encrypted_data_hash, key)
+            
+            # 比较哈希值
+            if current_data_hash != original_hash:
+                raise ValueError(f"SHRJsonLoader [ERROR.1012] data integrity check failed. File may have been tampered with. File Path : {path}")
+        
+        return decrypted_data
+    else:
+        # 不支持的加密类型，抛出异常
+        raise ValueError(f"SHRJsonLoader [ERROR.1013] unsupported encryption type: {ectype}. Supported types: 'b4' or None")
