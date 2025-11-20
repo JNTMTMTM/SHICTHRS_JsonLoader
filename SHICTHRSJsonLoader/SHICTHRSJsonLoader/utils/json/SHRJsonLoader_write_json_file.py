@@ -1,11 +1,12 @@
 
 import json
 import base64
+import hashlib
+import hmac
 from copy import deepcopy
 from ..hash.SHRJsonLoader_en_md5_hexdigest import en_md5hash_code
 
 def encrypt_with_key(data : str , key : str) -> str:
-    # 简单的异或加密
     encrypted_data = []
     key_length = len(key)
     for i, char in enumerate(data):
@@ -13,30 +14,38 @@ def encrypt_with_key(data : str , key : str) -> str:
         encrypted_data.append(encrypted_char)
     
     encrypted_str = ''.join(encrypted_data)
-    # 将加密后的数据进行base64编码
     return base64.b64encode(encrypted_str.encode('utf-8')).decode('utf-8')
 
+def encrypt_with_key_b3(data : str , key : str) -> str:
+    key_bytes = hashlib.sha256(key.encode('utf-8')).digest()
+    
+    # 使用HMAC-SHA256进行加密
+    hmac_obj = hmac.new(key_bytes, data.encode('utf-8'), hashlib.sha256)
+    encrypted_data = hmac_obj.digest()
+    
+    # 将数据和HMAC组合
+    combined = data.encode('utf-8') + b'|' + base64.b64encode(encrypted_data)
+    
+    return base64.b64encode(combined).decode('utf-8')
+
 def generate_key_hash(original_key : str , key : str) -> str:
-    # 生成原始键的MD5哈希值
-    key_hash = en_md5hash_code(original_key)[:8]  # 取前8位
-    
-    # 加密原始键
+    key_hash = en_md5hash_code(original_key)[:8]
     encrypted_key = encrypt_with_key(original_key, key)
-    
-    # 组合加密键和哈希值
+    return f"{encrypted_key}_{key_hash}"
+
+def generate_key_hash_b3(original_key : str , key : str) -> str:
+    key_hash = en_md5hash_code(original_key)[:8]
+    encrypted_key = encrypt_with_key_b3(original_key, key)
     return f"{encrypted_key}_{key_hash}"
 
 def encrypt_dict_keys_and_values(data_dict : dict , key : str) -> dict:
     encrypted_dict = {}
     for original_key, value in data_dict.items():
-        # 生成加密后的键+哈希值
         encrypted_key = generate_key_hash(original_key, key)
         
         if isinstance(value, dict):
-            # 如果值是字典，递归处理
             encrypted_dict[encrypted_key] = encrypt_dict_keys_and_values(value, key)
         elif isinstance(value, (list, tuple)):
-            # 如果值是列表或元组，处理每个元素
             encrypted_list = []
             for item in value:
                 if isinstance(item, dict):
@@ -44,47 +53,81 @@ def encrypt_dict_keys_and_values(data_dict : dict , key : str) -> dict:
                 elif isinstance(item, str):
                     encrypted_list.append(encrypt_with_key(item, key))
                 else:
-                    # 非字符串类型转换为字符串后再加密
                     encrypted_list.append(encrypt_with_key(str(item), key))
             encrypted_dict[encrypted_key] = encrypted_list
         elif isinstance(value, str):
-            # 字符串值直接加密
             encrypted_dict[encrypted_key] = encrypt_with_key(value, key)
         else:
-            # 非字符串类型转换为字符串后再加密
             encrypted_dict[encrypted_key] = encrypt_with_key(str(value), key)
+    
+    return encrypted_dict
+
+def encrypt_dict_keys_and_values_b3(data_dict : dict , key : str) -> dict:
+    encrypted_dict = {}
+    for original_key, value in data_dict.items():
+        encrypted_key = generate_key_hash_b3(original_key, key)
+        
+        if isinstance(value, dict):
+            encrypted_dict[encrypted_key] = encrypt_dict_keys_and_values_b3(value, key)
+        elif isinstance(value, (list, tuple)):
+            encrypted_list = []
+            for item in value:
+                if isinstance(item, dict):
+                    encrypted_list.append(encrypt_dict_keys_and_values_b3(item, key))
+                elif isinstance(item, str):
+                    encrypted_list.append(encrypt_with_key_b3(item, key))
+                else:
+                    encrypted_list.append(encrypt_with_key_b3(str(item), key))
+            encrypted_dict[encrypted_key] = encrypted_list
+        elif isinstance(value, str):
+            encrypted_dict[encrypted_key] = encrypt_with_key_b3(value, key)
+        else:
+            encrypted_dict[encrypted_key] = encrypt_with_key_b3(str(value), key)
     
     return encrypted_dict
 
 def write_json_file(json_dict : dict , path : str , ectype : str , key : str , verify : bool = False) -> None:
     if ectype is None or ectype == '':
-        # 非加密类型，直接写入原始数据
         with open(path , "w" , encoding = "utf-8") as f:
             json.dump(json_dict , f , ensure_ascii = False)
+            f.close()
+    elif ectype == 'b3':
+        if not key:
+            raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+        encrypted_dict = encrypt_dict_keys_and_values_b3(deepcopy(json_dict), key)
+        
+        encrypted_dict["_SHR_ECTYPE"] = ectype
+        
+        verification_token = encrypt_with_key_b3(key, key)
+        encrypted_dict["_SHR_VERIFICATION"] = verification_token
+        
+        if verify:
+            original_data_str = json.dumps(json_dict, sort_keys=True, ensure_ascii=False)
+            data_hash = en_md5hash_code(original_data_str)
+            encrypted_hash = encrypt_with_key_b3(data_hash, key)
+            encrypted_dict["_SHR_DATA_HASH"] = encrypted_hash
+        
+        with open(path , "w" , encoding = "utf-8") as f:
+            json.dump(encrypted_dict , f , ensure_ascii = False)
             f.close()
     elif ectype == 'b4':
         if not key:
             raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
-        # 深拷贝原始字典，避免修改原始数据
         encrypted_dict = encrypt_dict_keys_and_values(deepcopy(json_dict), key)
         
-        # 添加密钥验证键值对
-        verification_token = encrypt_with_key(key, key)  # 使用密钥自身加密作为验证令牌
+        encrypted_dict["_SHR_ECTYPE"] = ectype
+        
+        verification_token = encrypt_with_key(key, key)
         encrypted_dict["_SHR_VERIFICATION"] = verification_token
         
-        # 如果verify为True，添加原始数据的哈希值
         if verify:
-            # 计算原始数据的哈希值
             original_data_str = json.dumps(json_dict, sort_keys=True, ensure_ascii=False)
             data_hash = en_md5hash_code(original_data_str)
-            # 加密哈希值
             encrypted_hash = encrypt_with_key(data_hash, key)
             encrypted_dict["_SHR_DATA_HASH"] = encrypted_hash
         
-        # 将加密后的字典写入文件
         with open(path , "w" , encoding = "utf-8") as f:
             json.dump(encrypted_dict , f , ensure_ascii = False)
             f.close()
     else:
-        # 不支持的加密类型，抛出异常
-        raise ValueError(f"SHRJsonLoader [ERROR.1013] unsupported encryption type: {ectype}. Supported types: 'b4' or None")
+        raise ValueError(f"SHRJsonLoader [ERROR.1013] unsupported encryption type: {ectype}. Supported types: 'b3', 'b4' or None")
