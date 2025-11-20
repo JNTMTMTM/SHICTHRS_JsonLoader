@@ -20,39 +20,20 @@ def encrypt_with_key_b4(data : str , key : str) -> str:
     return base64.b64encode(encrypted_str.encode('utf-8')).decode('utf-8')
 
 def encrypt_with_key_b0(data : str , key : str) -> str:
-    # 使用 ChaCha20-Poly1305 认证加密，比 ChaCha20 更安全
     key_bytes = hashlib.sha256(key.encode('utf-8')).digest()
-    
-    # 生成随机 nonce（12字节）
     nonce = hashlib.sha256(key.encode('utf-8') + data.encode('utf-8')).digest()[:12]
-    
-    # 创建 ChaCha20 密码
     cipher = ChaCha20.new(key=key_bytes, nonce=nonce)
-    
-    # 加密数据
     ciphertext = cipher.encrypt(data.encode('utf-8'))
-    
-    # 创建 Poly1305 MAC（使用正确的 ChaCha20 密码参数）
     mac = Poly1305.new(key=key_bytes, cipher=ChaCha20, nonce=nonce).update(ciphertext).digest()
-    
-    # 组合 nonce、密文和 MAC
     encrypted_data = nonce + ciphertext + mac
-    
     return base64.b64encode(encrypted_data).decode('utf-8')
 
 def encrypt_with_key_b1(data : str , key : str) -> str:
-    # 使用 ChaCha20 流加密，比 AES 更安全
     key_bytes = hashlib.sha256(key.encode('utf-8')).digest()
-    
-    # 生成随机 nonce（12字节）
     nonce = hashlib.sha256(key.encode('utf-8') + data.encode('utf-8')).digest()[:12]
-    
     cipher = ChaCha20.new(key=key_bytes, nonce=nonce)
     ciphertext = cipher.encrypt(data.encode('utf-8'))
-    
-    # 组合 nonce 和密文
     encrypted_data = nonce + ciphertext
-    
     return base64.b64encode(encrypted_data).decode('utf-8')
 
 def encrypt_with_key_b2(data : str , key : str) -> str:
@@ -64,14 +45,9 @@ def encrypt_with_key_b2(data : str , key : str) -> str:
 
 def encrypt_with_key_b3(data : str , key : str) -> str:
     key_bytes = hashlib.sha256(key.encode('utf-8')).digest()
-    
-    # 使用HMAC-SHA256进行加密
     hmac_obj = hmac.new(key_bytes, data.encode('utf-8'), hashlib.sha256)
     encrypted_data = hmac_obj.digest()
-    
-    # 将数据和HMAC组合
     combined = data.encode('utf-8') + b'|' + base64.b64encode(encrypted_data)
-    
     return base64.b64encode(combined).decode('utf-8')
 
 def generate_key_hash_b4(original_key : str , key : str) -> str:

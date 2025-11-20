@@ -31,23 +31,14 @@ def decrypt_with_key_b0(encrypted_data : str , key : str) -> str:
     try:
         key_bytes = hashlib.sha256(key.encode('utf-8')).digest()
         data = base64.b64decode(encrypted_data)
-        
-        # 分离 nonce、密文和 MAC
         nonce = data[:12]
-        mac = data[-16:]  # Poly1305 MAC 是 16 字节
+        mac = data[-16:]
         ciphertext = data[12:-16]
-        
-        # 验证 MAC
         mac_obj = Poly1305.new(key=key_bytes, cipher=ChaCha20, nonce=nonce).update(ciphertext)
-        
-        # 比较计算的 MAC 和存储的 MAC
         if not hmac.compare_digest(mac_obj.digest(), mac):
             return encrypted_data
-            
-        # 解密数据
         cipher = ChaCha20.new(key=key_bytes, nonce=nonce)
         plaintext = cipher.decrypt(ciphertext)
-        
         return plaintext.decode('utf-8')
     except Exception:
         return encrypted_data
@@ -93,22 +84,15 @@ def decrypt_with_key_b3(encrypted_data : str , key : str) -> str:
     try:
         key_bytes = hashlib.sha256(key.encode('utf-8')).digest()
         combined = base64.b64decode(encrypted_data)
-        
-        # 分离数据和HMAC
         parts = combined.split(b'|')
         if len(parts) < 2:
             return encrypted_data
-            
         data = parts[0]
         stored_hmac = base64.b64decode(parts[1])
-        
-        # 验证HMAC
         hmac_obj = hmac.new(key_bytes, data, hashlib.sha256)
         computed_hmac = hmac_obj.digest()
-        
         if not hmac.compare_digest(stored_hmac, computed_hmac):
             return encrypted_data
-            
         return data.decode('utf-8')
     except Exception:
         return encrypted_data
