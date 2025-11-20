@@ -5,16 +5,6 @@ from copy import deepcopy
 from ..hash.SHRJsonLoader_en_md5_hexdigest import en_md5hash_code
 
 def encrypt_with_key(data : str , key : str) -> str:
-    """使用密钥对数据进行加密
-    Args:
-        data: 要加密的数据
-        key: 加密密钥
-    Returns:
-        加密后的base64字符串
-    """
-    if not key:
-        return data
-    
     # 简单的异或加密
     encrypted_data = []
     key_length = len(key)
@@ -27,13 +17,6 @@ def encrypt_with_key(data : str , key : str) -> str:
     return base64.b64encode(encrypted_str.encode('utf-8')).decode('utf-8')
 
 def generate_key_hash(original_key : str , key : str) -> str:
-    """为键生成哈希值并与加密后的键组合
-    Args:
-        original_key: 原始键
-        key: 加密密钥
-    Returns:
-        加密后的键+哈希值
-    """
     # 生成原始键的MD5哈希值
     key_hash = en_md5hash_code(original_key)[:8]  # 取前8位
     
@@ -44,13 +27,6 @@ def generate_key_hash(original_key : str , key : str) -> str:
     return f"{encrypted_key}_{key_hash}"
 
 def encrypt_dict_keys_and_values(data_dict : dict , key : str) -> dict:
-    """递归地对字典中的所有键和值进行加密，为每个键添加哈希值
-    Args:
-        data_dict: 要加密的字典
-        key: 加密密钥
-    Returns:
-        加密后的字典
-    """
     encrypted_dict = {}
     for original_key, value in data_dict.items():
         # 生成加密后的键+哈希值

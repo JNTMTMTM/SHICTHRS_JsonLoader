@@ -4,13 +4,6 @@ import base64
 from ..hash.SHRJsonLoader_en_md5_hexdigest import en_md5hash_code
 
 def decrypt_with_key(encrypted_data : str , key : str) -> str:
-    """使用密钥对数据进行解密
-    Args:
-        encrypted_data: 加密的base64字符串
-        key: 解密密钥
-    Returns:
-        解密后的原始数据
-    """
     if not key:
         return encrypted_data
     
@@ -30,13 +23,6 @@ def decrypt_with_key(encrypted_data : str , key : str) -> str:
         return encrypted_data
 
 def decrypt_key_and_verify_hash(encrypted_key_with_hash : str , key : str) -> str:
-    """解密键并验证哈希值
-    Args:
-        encrypted_key_with_hash: 加密的键+哈希值 (格式: encrypted_key_hash)
-        key: 解密密钥
-    Returns:
-        解密后的原始键
-    """
     try:
         # 分离加密的键和哈希值
         parts = encrypted_key_with_hash.rsplit('_', 1)
@@ -61,13 +47,6 @@ def decrypt_key_and_verify_hash(encrypted_key_with_hash : str , key : str) -> st
         return encrypted_key_with_hash
 
 def decrypt_dict_keys_and_values(encrypted_dict : dict , key : str) -> dict:
-    """递归地对字典中的所有键和值进行解密，并验证键的哈希值
-    Args:
-        encrypted_dict: 要解密的字典
-        key: 解密密钥
-    Returns:
-        解密后的字典
-    """
     decrypted_dict = {}
     for encrypted_key_name, value in encrypted_dict.items():
         # 解密键并验证哈希值
