@@ -36,6 +36,9 @@ def SHRJsonLoader_read_json_file(path : str , ectype : str = None , key : str = 
 
 def SHRJsonLoader_write_json_file(json_dict : dict , path : str , ectype : str = None , key : str = None , verify : bool = False) -> None:
     try:
+        if not isinstance(json_dict, dict):
+            raise TypeError(f"SHRJsonLoader [ERROR.1015] json_dict parameter must be a dictionary, got {type(json_dict).__name__}")
+            
         if path.endswith('.json'):
             write_json_file(json_dict , path , ectype , key , verify)
         else:

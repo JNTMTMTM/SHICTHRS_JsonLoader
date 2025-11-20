@@ -6,7 +6,7 @@ import hmac
 from copy import deepcopy
 from ..hash.SHRJsonLoader_en_md5_hexdigest import en_md5hash_code
 
-def encrypt_with_key(data : str , key : str) -> str:
+def encrypt_with_key_b4(data : str , key : str) -> str:
     encrypted_data = []
     key_length = len(key)
     for i, char in enumerate(data):
@@ -28,9 +28,9 @@ def encrypt_with_key_b3(data : str , key : str) -> str:
     
     return base64.b64encode(combined).decode('utf-8')
 
-def generate_key_hash(original_key : str , key : str) -> str:
+def generate_key_hash_b4(original_key : str , key : str) -> str:
     key_hash = en_md5hash_code(original_key)[:8]
-    encrypted_key = encrypt_with_key(original_key, key)
+    encrypted_key = encrypt_with_key_b4(original_key, key)
     return f"{encrypted_key}_{key_hash}"
 
 def generate_key_hash_b3(original_key : str , key : str) -> str:
@@ -38,27 +38,27 @@ def generate_key_hash_b3(original_key : str , key : str) -> str:
     encrypted_key = encrypt_with_key_b3(original_key, key)
     return f"{encrypted_key}_{key_hash}"
 
-def encrypt_dict_keys_and_values(data_dict : dict , key : str) -> dict:
+def encrypt_dict_keys_and_values_b4(data_dict : dict , key : str) -> dict:
     encrypted_dict = {}
     for original_key, value in data_dict.items():
-        encrypted_key = generate_key_hash(original_key, key)
+        encrypted_key = generate_key_hash_b4(original_key, key)
         
         if isinstance(value, dict):
-            encrypted_dict[encrypted_key] = encrypt_dict_keys_and_values(value, key)
+            encrypted_dict[encrypted_key] = encrypt_dict_keys_and_values_b4(value, key)
         elif isinstance(value, (list, tuple)):
             encrypted_list = []
             for item in value:
                 if isinstance(item, dict):
-                    encrypted_list.append(encrypt_dict_keys_and_values(item, key))
+                    encrypted_list.append(encrypt_dict_keys_and_values_b4(item, key))
                 elif isinstance(item, str):
-                    encrypted_list.append(encrypt_with_key(item, key))
+                    encrypted_list.append(encrypt_with_key_b4(item, key))
                 else:
-                    encrypted_list.append(encrypt_with_key(str(item), key))
+                    encrypted_list.append(encrypt_with_key_b4(str(item), key))
             encrypted_dict[encrypted_key] = encrypted_list
         elif isinstance(value, str):
-            encrypted_dict[encrypted_key] = encrypt_with_key(value, key)
+            encrypted_dict[encrypted_key] = encrypt_with_key_b4(value, key)
         else:
-            encrypted_dict[encrypted_key] = encrypt_with_key(str(value), key)
+            encrypted_dict[encrypted_key] = encrypt_with_key_b4(str(value), key)
     
     return encrypted_dict
 
@@ -113,17 +113,17 @@ def write_json_file(json_dict : dict , path : str , ectype : str , key : str , v
     elif ectype == 'b4':
         if not key:
             raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
-        encrypted_dict = encrypt_dict_keys_and_values(deepcopy(json_dict), key)
+        encrypted_dict = encrypt_dict_keys_and_values_b4(deepcopy(json_dict), key)
         
         encrypted_dict["_SHR_ECTYPE"] = ectype
         
-        verification_token = encrypt_with_key(key, key)
+        verification_token = encrypt_with_key_b4(key, key)
         encrypted_dict["_SHR_VERIFICATION"] = verification_token
         
         if verify:
             original_data_str = json.dumps(json_dict, sort_keys=True, ensure_ascii=False)
             data_hash = en_md5hash_code(original_data_str)
-            encrypted_hash = encrypt_with_key(data_hash, key)
+            encrypted_hash = encrypt_with_key_b4(data_hash, key)
             encrypted_dict["_SHR_DATA_HASH"] = encrypted_hash
         
         with open(path , "w" , encoding = "utf-8") as f:
