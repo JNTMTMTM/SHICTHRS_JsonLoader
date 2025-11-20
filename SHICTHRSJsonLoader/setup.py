@@ -9,5 +9,5 @@ setup(name='SHICTHRSJsonLoader',
       license='GPL-3.0',
       packages=find_packages(),
       include_package_data=True,
-      install_requires=['colorama==0.4.6'],
+      install_requires=['colorama==0.4.6' , 'pycryptodome==3.23.0'],
       zip_safe=False)
