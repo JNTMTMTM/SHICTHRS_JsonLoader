@@ -17,6 +17,18 @@ print('|  \033[1mCopyright : © 2025-2026 SHICTHRS, Std. All rights reserved.\03
 
 __all__ = ['SHRJsonLoader_read_json_file' , 'SHRJsonLoader_write_json_file']
 
+ENCRYPTION_TYPES : dict = {'zh-cn' : ['B0-ChaCha20-Poly1305 认证加密' ,
+                            'B1-ChaCha20 流加密' ,
+                            'B2-AES-CBC 块加密' ,
+                            'B3-HMAC-SHA256 认证' ,
+                            'B4-XOR 异或加密'] ,
+                        'en' : ['B0-ChaCha20-Poly1305 Authenticated Encryption' ,
+                                    'B1-ChaCha20 Stream Encryption' ,
+                                    'B2-AES-CBC Block Encryption' ,
+                                    'B3-HMAC-SHA256 Authentication' ,
+                                    'B4-XOR Encryption'] ,
+                                    }
+
 class SHRJsonLoaderException(BaseException):
     def __init__(self , message: str) -> None:
         self.message = message
