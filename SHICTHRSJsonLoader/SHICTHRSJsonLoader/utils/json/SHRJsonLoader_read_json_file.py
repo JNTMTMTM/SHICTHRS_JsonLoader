@@ -305,7 +305,7 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
     if ectype is None or ectype == '':
         stored_ectype = data.get("_SHR_ECTYPE", None)
         if stored_ectype is not None and stored_ectype != '' and stored_ectype != ectype:
-            raise ValueError(f"SHRJsonLoader [ERROR.1014] encryption type mismatch. File was encrypted with '{stored_ectype}' but '{ectype}' was provided. File Path : {path}")
+            raise ValueError(f"SHRJsonLoaderException [ERROR.1014] encryption type mismatch. File was encrypted with '{stored_ectype}' but '{ectype}' was provided. File Path : {path}")
         
         data_without_metadata = {k: v for k, v in data.items() if k != "_SHR_ECTYPE"}
         return data_without_metadata
@@ -317,11 +317,11 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
         if ectype is None or ectype == '':
             ectype = stored_ectype
         elif stored_ectype and stored_ectype != ectype:
-            raise ValueError(f"SHRJsonLoader [ERROR.1014] encryption type mismatch. File was encrypted with '{stored_ectype}' but '{ectype}' was provided. File Path : {path}")
+            raise ValueError(f"SHRJsonLoaderException [ERROR.1014] encryption type mismatch. File was encrypted with '{stored_ectype}' but '{ectype}' was provided. File Path : {path}")
         
         if ectype == 'b0':
             if not key:
-                raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1009] json file enkey not found. File Path : {path}")
             
             # 优先检查文件哈希值（在解密前）
             has_file_hash = "_SHR_FILE_HASH" in data
@@ -339,17 +339,17 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
                 original_file_hash = decrypt_with_key_b0(encrypted_file_hash, key)
                 
                 if current_file_hash != original_file_hash:
-                    raise ValueError(f"SHRJsonLoader [ERROR.1016] file integrity check failed. File may have been tampered with. File Path : {path}")
+                    raise ValueError(f"SHRJsonLoaderException [ERROR.1016] file integrity check failed. File may have been tampered with. File Path : {path}")
             
             # 验证加密文件有效性
             if "_SHR_VERIFICATION" not in data:
-                raise ValueError(f"SHRJsonLoader [ERROR.1010] invalid encrypted file. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1010] invalid encrypted file. File Path : {path}")
             
             verification_token = data["_SHR_VERIFICATION"]
             decrypted_token = decrypt_with_key_b0(verification_token, key)
             
             if decrypted_token != key:
-                raise ValueError(f"SHRJsonLoader [ERROR.1011] incorrect key provided. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1011] incorrect key provided. File Path : {path}")
             
             has_data_hash = "_SHR_DATA_HASH" in data
             encrypted_data_hash = data.get("_SHR_DATA_HASH", None)
@@ -365,12 +365,12 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
                 original_hash = decrypt_with_key_b0(encrypted_data_hash, key)
                 
                 if current_data_hash != original_hash:
-                    raise ValueError(f"SHRJsonLoader [ERROR.1012] data integrity check failed. File may have been tampered with. File Path : {path}")
+                    raise ValueError(f"SHRJsonLoaderException [ERROR.1012] data integrity check failed. File may have been tampered with. File Path : {path}")
             
             return decrypted_data
         elif ectype == 'b1':
             if not key:
-                raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1009] json file enkey not found. File Path : {path}")
             
             # 优先检查文件哈希值（在解密前）
             has_file_hash = "_SHR_FILE_HASH" in data
@@ -388,17 +388,17 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
                 original_file_hash = decrypt_with_key_b1(encrypted_file_hash, key)
                 
                 if current_file_hash != original_file_hash:
-                    raise ValueError(f"SHRJsonLoader [ERROR.1016] file integrity check failed. File may have been tampered with. File Path : {path}")
+                    raise ValueError(f"SHRJsonLoaderException [ERROR.1016] file integrity check failed. File may have been tampered with. File Path : {path}")
             
             # 验证加密文件有效性
             if "_SHR_VERIFICATION" not in data:
-                raise ValueError(f"SHRJsonLoader [ERROR.1010] invalid encrypted file. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1010] invalid encrypted file. File Path : {path}")
             
             verification_token = data["_SHR_VERIFICATION"]
             decrypted_token = decrypt_with_key_b1(verification_token, key)
             
             if decrypted_token != key:
-                raise ValueError(f"SHRJsonLoader [ERROR.1011] incorrect key provided. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1011] incorrect key provided. File Path : {path}")
             
             has_data_hash = "_SHR_DATA_HASH" in data
             encrypted_data_hash = data.get("_SHR_DATA_HASH", None)
@@ -414,12 +414,12 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
                 original_hash = decrypt_with_key_b1(encrypted_data_hash, key)
                 
                 if current_data_hash != original_hash:
-                    raise ValueError(f"SHRJsonLoader [ERROR.1012] data integrity check failed. File may have been tampered with. File Path : {path}")
+                    raise ValueError(f"SHRJsonLoaderException [ERROR.1012] data integrity check failed. File may have been tampered with. File Path : {path}")
             
             return decrypted_data
         elif ectype == 'b2':
             if not key:
-                raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1009] json file enkey not found. File Path : {path}")
             
             # 优先检查文件哈希值（在解密前）
             has_file_hash = "_SHR_FILE_HASH" in data
@@ -437,17 +437,17 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
                 original_file_hash = decrypt_with_key_b2(encrypted_file_hash, key)
                 
                 if current_file_hash != original_file_hash:
-                    raise ValueError(f"SHRJsonLoader [ERROR.1016] file integrity check failed. File may have been tampered with. File Path : {path}")
+                    raise ValueError(f"SHRJsonLoaderException [ERROR.1016] file integrity check failed. File may have been tampered with. File Path : {path}")
             
             # 验证加密文件有效性
             if "_SHR_VERIFICATION" not in data:
-                raise ValueError(f"SHRJsonLoader [ERROR.1010] invalid encrypted file. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1010] invalid encrypted file. File Path : {path}")
             
             verification_token = data["_SHR_VERIFICATION"]
             decrypted_token = decrypt_with_key_b2(verification_token, key)
             
             if decrypted_token != key:
-                raise ValueError(f"SHRJsonLoader [ERROR.1011] incorrect key provided. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1011] incorrect key provided. File Path : {path}")
             
             has_data_hash = "_SHR_DATA_HASH" in data
             encrypted_data_hash = data.get("_SHR_DATA_HASH", None)
@@ -463,12 +463,12 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
                 original_hash = decrypt_with_key_b2(encrypted_data_hash, key)
                 
                 if current_data_hash != original_hash:
-                    raise ValueError(f"SHRJsonLoader [ERROR.1012] data integrity check failed. File may have been tampered with. File Path : {path}")
+                    raise ValueError(f"SHRJsonLoaderException [ERROR.1012] data integrity check failed. File may have been tampered with. File Path : {path}")
             
             return decrypted_data
         elif ectype == 'b3':
             if not key:
-                raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1009] json file enkey not found. File Path : {path}")
             
             # 优先检查文件哈希值（在解密前）
             has_file_hash = "_SHR_FILE_HASH" in data
@@ -486,17 +486,17 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
                 original_file_hash = decrypt_with_key_b3(encrypted_file_hash, key)
                 
                 if current_file_hash != original_file_hash:
-                    raise ValueError(f"SHRJsonLoader [ERROR.1016] file integrity check failed. File may have been tampered with. File Path : {path}")
+                    raise ValueError(f"SHRJsonLoaderException [ERROR.1016] file integrity check failed. File may have been tampered with. File Path : {path}")
             
             # 验证加密文件有效性
             if "_SHR_VERIFICATION" not in data:
-                raise ValueError(f"SHRJsonLoader [ERROR.1010] invalid encrypted file. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1010] invalid encrypted file. File Path : {path}")
             
             verification_token = data["_SHR_VERIFICATION"]
             decrypted_token = decrypt_with_key_b3(verification_token, key)
             
             if decrypted_token != key:
-                raise ValueError(f"SHRJsonLoader [ERROR.1011] incorrect key provided. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1011] incorrect key provided. File Path : {path}")
             
             has_data_hash = "_SHR_DATA_HASH" in data
             encrypted_data_hash = data.get("_SHR_DATA_HASH", None)
@@ -512,12 +512,12 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
                 original_hash = decrypt_with_key_b3(encrypted_data_hash, key)
                 
                 if current_data_hash != original_hash:
-                    raise ValueError(f"SHRJsonLoader [ERROR.1012] data integrity check failed. File may have been tampered with. File Path : {path}")
+                    raise ValueError(f"SHRJsonLoaderException [ERROR.1012] data integrity check failed. File may have been tampered with. File Path : {path}")
             
             return decrypted_data
         elif ectype == 'b4':
             if not key:
-                raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1009] json file enkey not found. File Path : {path}")
             
             # 优先检查文件哈希值（在解密前）
             has_file_hash = "_SHR_FILE_HASH" in data
@@ -535,17 +535,17 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
                 original_file_hash = decrypt_with_key_b4(encrypted_file_hash, key)
                 
                 if current_file_hash != original_file_hash:
-                    raise ValueError(f"SHRJsonLoader [ERROR.1016] file integrity check failed. File may have been tampered with. File Path : {path}")
+                    raise ValueError(f"SHRJsonLoaderException [ERROR.1016] file integrity check failed. File may have been tampered with. File Path : {path}")
             
             # 验证加密文件有效性
             if "_SHR_VERIFICATION" not in data:
-                raise ValueError(f"SHRJsonLoader [ERROR.1010] invalid encrypted file. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1010] invalid encrypted file. File Path : {path}")
             
             verification_token = data["_SHR_VERIFICATION"]
             decrypted_token = decrypt_with_key_b4(verification_token, key)
             
             if decrypted_token != key:
-                raise ValueError(f"SHRJsonLoader [ERROR.1011] incorrect key provided. File Path : {path}")
+                raise ValueError(f"SHRJsonLoaderException [ERROR.1011] incorrect key provided. File Path : {path}")
             
             has_data_hash = "_SHR_DATA_HASH" in data
             encrypted_data_hash = data.get("_SHR_DATA_HASH", None)
@@ -561,8 +561,8 @@ def read_json_file(path : str , ectype : str , key : str , verify : bool = False
                 original_hash = decrypt_with_key_b4(encrypted_data_hash, key)
                 
                 if current_data_hash != original_hash:
-                    raise ValueError(f"SHRJsonLoader [ERROR.1012] data integrity check failed. File may have been tampered with. File Path : {path}")
+                    raise ValueError(f"SHRJsonLoaderException [ERROR.1012] data integrity check failed. File may have been tampered with. File Path : {path}")
             
             return decrypted_data
         else:
-            raise ValueError(f"SHRJsonLoader [ERROR.1013] unsupported encryption type: {ectype}. Supported types: 'b0', 'b1', 'b2', 'b3', 'b4' or None")
+            raise ValueError(f"SHRJsonLoaderException [ERROR.1013] unsupported encryption type: {ectype}. Supported types: 'b0', 'b1', 'b2', 'b3', 'b4' or None")

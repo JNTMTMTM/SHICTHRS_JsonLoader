@@ -42,21 +42,21 @@ def SHRJsonLoader_read_json_file(path : str , ectype : str = None , key : str = 
             if os.path.isfile(path) and path.endswith('.json'):
                 return read_json_file(path , ectype , key , verify)
             else:
-                raise SHRJsonLoaderException(f"SHRJsonLoader [ERROR.1004] only json file is supported not .{path.split('.')[-1]}.")
+                raise SHRJsonLoaderException(f"SHRJsonLoaderException [ERROR.1004] only json file is supported not .{path.split('.')[-1]}.")
         else:
-            raise SHRJsonLoaderException(f"SHRJsonLoader [ERROR.1005] unable to find json file. File Path : {path} NOT FOUND")
+            raise SHRJsonLoaderException(f"SHRJsonLoaderException [ERROR.1005] unable to find json file. File Path : {path} NOT FOUND")
     except Exception as e:
-        raise SHRJsonLoaderException(f"SHRJsonLoader [ERROR.1006] unable to read json file. File Path : {path} | {e}")
+        raise SHRJsonLoaderException(f"SHRJsonLoaderException [ERROR.1006] unable to read json file. File Path : {path} | {e}")
 
 def SHRJsonLoader_write_json_file(json_dict : dict , path : str , ectype : str = None , key : str = None , verify : bool = False) -> None:
     try:
         if not isinstance(json_dict, dict):
-            raise SHRJsonLoaderException(f"SHRJsonLoader [ERROR.1015] json_dict parameter must be a dictionary, got {type(json_dict).__name__}")
+            raise SHRJsonLoaderException(f"SHRJsonLoaderException [ERROR.1015] json_dict parameter must be a dictionary, got {type(json_dict).__name__}")
             
         if path.endswith('.json'):
             write_json_file(json_dict , path , ectype , key , verify)
         else:
-            raise SHRJsonLoaderException(f"SHRJsonLoader [ERROR.1007] only json file is supported not .{path.split('.')[-1]}.")
+            raise SHRJsonLoaderException(f"SHRJsonLoaderException [ERROR.1007] only json file is supported not .{path.split('.')[-1]}.")
     except Exception as e:
-        raise SHRJsonLoaderException(f"SHRJsonLoader [ERROR.1008] unable to write json file. File Path : {path} | {e}")
+        raise SHRJsonLoaderException(f"SHRJsonLoaderException [ERROR.1008] unable to write json file. File Path : {path} | {e}")
 

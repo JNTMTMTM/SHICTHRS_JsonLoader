@@ -202,7 +202,7 @@ def write_json_file(json_dict : dict , path : str , ectype : str , key : str , v
             f.close()
     elif ectype == 'b0':
         if not key:
-            raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+            raise ValueError(f"SHRJsonLoaderException [ERROR.1009] json file enkey not found. File Path : {path}")
         encrypted_dict = encrypt_dict_keys_and_values_b0(deepcopy(json_dict), key)
         
         encrypted_dict["_SHR_ECTYPE"] = ectype
@@ -234,7 +234,7 @@ def write_json_file(json_dict : dict , path : str , ectype : str , key : str , v
             f.close()
     elif ectype == 'b1':
         if not key:
-            raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+            raise ValueError(f"SHRJsonLoaderException [ERROR.1009] json file enkey not found. File Path : {path}")
         encrypted_dict = encrypt_dict_keys_and_values_b1(deepcopy(json_dict), key)
         
         encrypted_dict["_SHR_ECTYPE"] = ectype
@@ -266,7 +266,7 @@ def write_json_file(json_dict : dict , path : str , ectype : str , key : str , v
             f.close()
     elif ectype == 'b2':
         if not key:
-            raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+            raise ValueError(f"SHRJsonLoaderException [ERROR.1009] json file enkey not found. File Path : {path}")
         encrypted_dict = encrypt_dict_keys_and_values_b2(deepcopy(json_dict), key)
         
         encrypted_dict["_SHR_ECTYPE"] = ectype
@@ -298,7 +298,7 @@ def write_json_file(json_dict : dict , path : str , ectype : str , key : str , v
             f.close()
     elif ectype == 'b3':
         if not key:
-            raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+            raise ValueError(f"SHRJsonLoaderException [ERROR.1009] json file enkey not found. File Path : {path}")
         encrypted_dict = encrypt_dict_keys_and_values_b3(deepcopy(json_dict), key)
         
         encrypted_dict["_SHR_ECTYPE"] = ectype
@@ -330,7 +330,7 @@ def write_json_file(json_dict : dict , path : str , ectype : str , key : str , v
             f.close()
     elif ectype == 'b4':
         if not key:
-            raise ValueError(f"SHRJsonLoader [ERROR.1009] json file enkey not found. File Path : {path}")
+            raise ValueError(f"SHRJsonLoaderException [ERROR.1009] json file enkey not found. File Path : {path}")
         encrypted_dict = encrypt_dict_keys_and_values_b4(deepcopy(json_dict), key)
         
         encrypted_dict["_SHR_ECTYPE"] = ectype
@@ -361,4 +361,4 @@ def write_json_file(json_dict : dict , path : str , ectype : str , key : str , v
             json.dump(encrypted_dict , f , ensure_ascii = False)
             f.close()
     else:
-        raise ValueError(f"SHRJsonLoader [ERROR.1013] unsupported encryption type: {ectype}. Supported types: 'b0', 'b1', 'b2', 'b3', 'b4' or None")
+        raise ValueError(f"SHRJsonLoaderException [ERROR.1013] unsupported encryption type: {ectype}. Supported types: 'b0', 'b1', 'b2', 'b3', 'b4' or None")
