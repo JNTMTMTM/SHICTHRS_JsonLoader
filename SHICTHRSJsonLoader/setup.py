@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='SHICTHRSJsonLoader',
-      version='1.4.0',
+      version='1.5.0',
       description='SHICTHRS json file io/encrypt-decrypt system',
       url='https://github.com/JNTMTMTM/SHICTHRS_LogCore',
       author='SHICTHRS',

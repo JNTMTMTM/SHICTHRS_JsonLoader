@@ -29,7 +29,7 @@ ENCRYPTION_TYPES : dict = {'zh-cn' : ['B0-ChaCha20-Poly1305 认证加密' ,
                             'B4-XOR Encryption'] ,
                             }
 
-class SHRJsonLoaderException(BaseException):
+class SHRJsonLoaderException(Exception):
     def __init__(self , message: str) -> None:
         self.message = message
     
